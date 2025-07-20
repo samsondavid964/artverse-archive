@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Heart, ExternalLink } from "lucide-react";
 import { useState } from "react";
 
@@ -17,6 +18,7 @@ interface NFTCardProps {
   collection?: string;
   chain?: string;
   mintDate?: string;
+  viewMode?: 'grid' | 'list';
 }
 
 const NFTCard = ({ 
@@ -27,10 +29,87 @@ const NFTCard = ({
   attributes, 
   collection = "Unknown Collection",
   chain = "Ethereum",
-  mintDate = "2024-01-01"
+  mintDate = "2024-01-01",
+  viewMode = 'grid'
 }: NFTCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  if (viewMode === 'list') {
+    return (
+      <Card className="group overflow-hidden bg-card border-border hover:shadow-hover transition-all duration-300 cursor-pointer">
+        <div className="flex gap-4 p-4">
+          <div className="relative w-24 h-24 overflow-hidden bg-muted rounded-lg flex-shrink-0">
+            <img 
+              src={image} 
+              alt={name}
+              className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onLoad={() => setImageLoaded(true)}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop";
+              }}
+            />
+          </div>
+          
+          <div className="flex-1 min-w-0 space-y-2">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-muted-foreground truncate">
+                  {collection}
+                </p>
+                <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors duration-200">
+                  {name}
+                </h3>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="text-xs font-medium">
+                  {chain}
+                </Badge>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-8 h-8 p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsLiked(!isLiked);
+                  }}
+                >
+                  <Heart className={`h-4 w-4 ${isLiked ? "text-accent fill-accent" : ""}`} />
+                </Button>
+              </div>
+            </div>
+            
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {description}
+            </p>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex flex-wrap gap-1">
+                {attributes.slice(0, 3).map((attr, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {attr.value}
+                  </Badge>
+                ))}
+                {attributes.length > 3 && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground">
+                    +{attributes.length - 3} more
+                  </Badge>
+                )}
+              </div>
+              
+              <p className="text-xs text-muted-foreground">
+                Minted {new Date(mintDate).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="group overflow-hidden bg-card border-border hover:shadow-hover transition-all duration-300 hover:scale-[1.02] cursor-pointer">
@@ -42,6 +121,10 @@ const NFTCard = ({
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
           onLoad={() => setImageLoaded(true)}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop";
+          }}
         />
         
         {/* Gradient overlay on hover */}

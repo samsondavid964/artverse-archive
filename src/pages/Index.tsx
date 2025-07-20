@@ -18,10 +18,6 @@ const Index = () => {
     setFilters(newFilters);
   };
 
-  const handleLoadMore = () => {
-    // Implement pagination logic here
-    console.log("Loading more NFTs...");
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -109,9 +105,6 @@ const Index = () => {
               <NFTGrid
                 searchQuery={searchQuery}
                 filters={filters}
-                onLoadMore={handleLoadMore}
-                hasMore={true}
-                loading={false}
               />
             </div>
           </div>
