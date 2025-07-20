@@ -17,9 +17,10 @@ interface NFT {
 interface NFTGridContentProps {
   nfts: NFT[];
   viewMode: 'grid' | 'list';
+  onNFTClick: (nft: NFT) => void;
 }
 
-const NFTGridContent = ({ nfts, viewMode }: NFTGridContentProps) => {
+const NFTGridContent = ({ nfts, viewMode, onNFTClick }: NFTGridContentProps) => {
   return (
     <div className={`grid gap-6 ${
       viewMode === 'grid' 
@@ -32,7 +33,7 @@ const NFTGridContent = ({ nfts, viewMode }: NFTGridContentProps) => {
           className="animate-fade-in"
           style={{ animationDelay: `${index * 50}ms` }}
         >
-          <NFTCard {...nft} viewMode={viewMode} />
+          <NFTCard {...nft} viewMode={viewMode} onClick={() => onNFTClick(nft)} />
         </div>
       ))}
     </div>

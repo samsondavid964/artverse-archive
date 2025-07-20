@@ -8,11 +8,13 @@ import { useNFTData } from "@/hooks/useNFTData";
 interface NFTGridProps {
   searchQuery?: string;
   filters?: any;
+  onNFTClick?: (nft: any) => void;
 }
 
 const NFTGrid = ({ 
   searchQuery = "", 
-  filters = {}
+  filters = {},
+  onNFTClick
 }: NFTGridProps) => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { nfts, loading, hasMore, loadMore, totalCount } = useNFTData(searchQuery, filters);
@@ -48,6 +50,7 @@ const NFTGrid = ({
       <NFTGridContent 
         nfts={nfts}
         viewMode={viewMode}
+        onNFTClick={onNFTClick || (() => {})}
       />
 
       <LoadMoreButton

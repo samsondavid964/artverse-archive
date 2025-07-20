@@ -2,6 +2,7 @@ import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
 import FilterSidebar from "@/components/FilterSidebar";
 import NFTGrid from "@/components/NFTGrid";
+import NFTDetailModal from "@/components/NFTDetailModal";
 import { Button } from "@/components/ui/button";
 import { Database, Sparkles, TrendingUp } from "lucide-react";
 
@@ -9,6 +10,8 @@ const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({});
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedNFT, setSelectedNFT] = useState<any>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -16,6 +19,16 @@ const Index = () => {
 
   const handleFiltersChange = (newFilters: any) => {
     setFilters(newFilters);
+  };
+
+  const handleNFTClick = (nft: any) => {
+    setSelectedNFT(nft);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setSelectedNFT(null);
   };
 
 
@@ -105,6 +118,7 @@ const Index = () => {
               <NFTGrid
                 searchQuery={searchQuery}
                 filters={filters}
+                onNFTClick={handleNFTClick}
               />
             </div>
           </div>
@@ -116,6 +130,12 @@ const Index = () => {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         onFiltersChange={handleFiltersChange}
+      />
+
+      <NFTDetailModal 
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetailModal}
+        nft={selectedNFT}
       />
 
       {/* Footer */}

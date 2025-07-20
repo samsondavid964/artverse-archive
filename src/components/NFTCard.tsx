@@ -19,6 +19,7 @@ interface NFTCardProps {
   chain?: string;
   mintDate?: string;
   viewMode?: 'grid' | 'list';
+  onClick?: () => void;
 }
 
 const NFTCard = ({ 
@@ -30,14 +31,18 @@ const NFTCard = ({
   collection = "Unknown Collection",
   chain = "Ethereum",
   mintDate = "2024-01-01",
-  viewMode = 'grid'
+  viewMode = 'grid',
+  onClick
 }: NFTCardProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   if (viewMode === 'list') {
     return (
-      <Card className="group overflow-hidden bg-card border-border hover:shadow-hover transition-all duration-300 cursor-pointer">
+      <Card 
+        className="group overflow-hidden bg-card border-border hover:shadow-hover transition-all duration-300 cursor-pointer hover:scale-[1.01] active:scale-[0.99]" 
+        onClick={onClick}
+      >
         <div className="flex gap-4 p-4">
           <div className="relative w-24 h-24 overflow-hidden bg-muted rounded-lg flex-shrink-0">
             <img 
@@ -112,7 +117,10 @@ const NFTCard = ({
   }
 
   return (
-    <Card className="group overflow-hidden bg-card border-border hover:shadow-hover transition-all duration-300 hover:scale-[1.02] cursor-pointer">
+    <Card 
+      className="group overflow-hidden bg-card border-border hover:shadow-hover transition-all duration-300 hover:scale-[1.02] cursor-pointer active:scale-[0.98]" 
+      onClick={onClick}
+    >
       <div className="relative aspect-square overflow-hidden bg-muted">
         <img 
           src={image} 
