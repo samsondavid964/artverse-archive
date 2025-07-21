@@ -5,14 +5,12 @@ import { useState } from "react";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
-  onFilterToggle: () => void;
   placeholder?: string;
 }
 
 const SearchBar = ({ 
   onSearch, 
-  onFilterToggle, 
-  placeholder = "Search by Artist Wallet, Collection Name, Token ID, Trait..." 
+  placeholder = "Search by Collection, Token ID, Blockchain, File Type, or Artist Wallet..." 
 }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -34,20 +32,10 @@ const SearchBar = ({
             placeholder={placeholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 pr-20 py-6 text-lg border-2 border-border focus:border-primary transition-colors duration-200 bg-card shadow-card"
+            className="pl-12 pr-16 py-6 text-lg border-2 border-border focus:border-primary transition-colors duration-200 bg-card shadow-card"
           />
           
-          <div className="absolute right-2 flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onFilterToggle}
-              className="h-8 w-8 p-0"
-            >
-              <Filter className="h-4 w-4" />
-            </Button>
-            
+          <div className="absolute right-2 flex items-center">
             <Button
               type="submit"
               size="sm"
@@ -59,23 +47,48 @@ const SearchBar = ({
         </div>
       </form>
       
-      {/* Quick search suggestions */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <span className="text-sm text-muted-foreground">Popular searches:</span>
-        {["CryptoPunks", "Bored Ape", "Art Blocks", "Azuki", "Doodles"].map((suggestion) => (
-          <Button
-            key={suggestion}
-            variant="outline"
-            size="sm"
-            className="h-7 px-3 text-xs"
-            onClick={() => {
-              setSearchQuery(suggestion);
-              onSearch(suggestion);
-            }}
-          >
-            {suggestion}
-          </Button>
-        ))}
+      {/* Search examples and tips */}
+      <div className="mt-4 space-y-3">
+        <div className="flex flex-wrap gap-2">
+          <span className="text-sm text-muted-foreground">Quick searches:</span>
+          {["CryptoPunks", "Bored Ape", "Art Blocks", "Azuki", "Doodles"].map((suggestion) => (
+            <Button
+              key={suggestion}
+              variant="outline"
+              size="sm"
+              className="h-7 px-3 text-xs"
+              onClick={() => {
+                setSearchQuery(suggestion);
+                onSearch(suggestion);
+              }}
+            >
+              {suggestion}
+            </Button>
+          ))}
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          <span className="text-sm text-muted-foreground">Search examples:</span>
+          {[
+            "blockchain:ethereum", 
+            "type:image", 
+            "type:video",
+            "#1234"
+          ].map((example) => (
+            <Button
+              key={example}
+              variant="ghost"
+              size="sm"
+              className="h-7 px-3 text-xs font-mono"
+              onClick={() => {
+                setSearchQuery(example);
+                onSearch(example);
+              }}
+            >
+              {example}
+            </Button>
+          ))}
+        </div>
       </div>
     </div>
   );

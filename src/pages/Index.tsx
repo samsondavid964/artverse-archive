@@ -1,24 +1,16 @@
 import { useState } from "react";
 import SearchBar from "@/components/SearchBar";
-import FilterSidebar from "@/components/FilterSidebar";
 import NFTGrid from "@/components/NFTGrid";
 import NFTDetailModal from "@/components/NFTDetailModal";
-import { Button } from "@/components/ui/button";
 import { Database, Sparkles, TrendingUp } from "lucide-react";
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState({});
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState<any>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-  };
-
-  const handleFiltersChange = (newFilters: any) => {
-    setFilters(newFilters);
   };
 
   const handleNFTClick = (nft: any) => {
@@ -76,7 +68,6 @@ const Index = () => {
             
             <SearchBar
               onSearch={handleSearch}
-              onFilterToggle={() => setIsFilterOpen(!isFilterOpen)}
             />
           </div>
 
@@ -101,36 +92,12 @@ const Index = () => {
       {/* Main Content */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="flex gap-8">
-            {/* Filter Sidebar */}
-            <div className="hidden lg:block w-80 flex-shrink-0">
-              <div className="sticky top-32">
-                <FilterSidebar
-                  isOpen={true}
-                  onClose={() => {}}
-                  onFiltersChange={handleFiltersChange}
-                />
-              </div>
-            </div>
-            
-            {/* NFT Grid */}
-            <div className="flex-1 min-w-0">
-              <NFTGrid
-                searchQuery={searchQuery}
-                filters={filters}
-                onNFTClick={handleNFTClick}
-              />
-            </div>
-          </div>
+          <NFTGrid
+            searchQuery={searchQuery}
+            onNFTClick={handleNFTClick}
+          />
         </div>
       </section>
-
-      {/* Mobile Filter Sidebar */}
-      <FilterSidebar
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        onFiltersChange={handleFiltersChange}
-      />
 
       <NFTDetailModal 
         isOpen={isDetailModalOpen}

@@ -116,7 +116,7 @@ const mockNFTs: NFT[] = [
   }))
 ];
 
-export const useNFTData = (searchQuery: string, filters: any) => {
+export const useNFTData = (searchQuery: string) => {
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -124,43 +124,90 @@ export const useNFTData = (searchQuery: string, filters: any) => {
 
   const pageSize = 12;
 
-  const filterNFTs = useCallback((nfts: NFT[], query: string, filters: any) => {
+  const parseSearchQuery = useCallback((query: string) => {
+    const terms: string[] = [];
+    const filters: any = {};
+    
+    // Split query by spaces but keep quoted strings together
+    const parts = query.match(/(".*?"|\S+)/g) || [];
+    
+    parts.forEach(part => {
+      const cleanPart = part.replace(/^"(.*)"$/, '$1'); // Remove quotes
+      
+      // Check for specific search patterns
+      if (cleanPart.startsWith('blockchain:')) {
+        filters.blockchain = cleanPart.substring(10).toLowerCase();
+      } else if (cleanPart.startsWith('chain:')) {
+        filters.blockchain = cleanPart.substring(6).toLowerCase();
+      } else if (cleanPart.startsWith('type:')) {
+        filters.fileType = cleanPart.substring(5).toLowerCase();
+      } else if (cleanPart.startsWith('#')) {
+        // Token ID search
+        filters.tokenId = cleanPart.substring(1);
+      } else if (/^\d+$/.test(cleanPart)) {
+        // Pure number - also treat as potential token ID
+        filters.tokenId = cleanPart;
+      } else {
+        // Regular search term
+        terms.push(cleanPart.toLowerCase());
+      }
+    });
+    
+    return { terms, filters };
+  }, []);
+
+  const filterNFTs = useCallback((nfts: NFT[], query: string) => {
+    if (!query.trim()) return nfts;
+    
+    const { terms, filters } = parseSearchQuery(query);
+    
     return nfts.filter(nft => {
-      // Search query filter
-      if (query) {
-        const searchTerm = query.toLowerCase();
-        const matchesSearch = (
-          nft.name.toLowerCase().includes(searchTerm) ||
-          nft.collection?.toLowerCase().includes(searchTerm) ||
-          nft.description.toLowerCase().includes(searchTerm) ||
-          nft.attributes.some(attr => 
-            attr.trait_type.toLowerCase().includes(searchTerm) ||
-            attr.value.toLowerCase().includes(searchTerm)
-          )
-        );
-        if (!matchesSearch) return false;
-      }
-
-      // Chain filter
-      if (filters.chains?.length > 0 && !filters.chains.includes(nft.chain)) {
+      // Blockchain filter
+      if (filters.blockchain && nft.chain?.toLowerCase() !== filters.blockchain) {
         return false;
       }
-
-      // Collection filter
-      if (filters.collections?.length > 0 && !filters.collections.includes(nft.collection)) {
+      
+      // File type filter (mock - would check actual file extension in real app)
+      if (filters.fileType) {
+        const imageTypes = ['image', 'img', 'jpeg', 'jpg', 'png', 'gif', 'webp'];
+        const videoTypes = ['video', 'mp4', 'avi', 'mov', 'webm'];
+        
+        if (filters.fileType === 'image' && !imageTypes.some(type => 
+          nft.image?.toLowerCase().includes(type) || nft.name.toLowerCase().includes(type)
+        )) {
+          return false;
+        }
+        
+        if (filters.fileType === 'video' && !videoTypes.some(type => 
+          nft.image?.toLowerCase().includes(type) || nft.name.toLowerCase().includes(type)
+        )) {
+          return false;
+        }
+      }
+      
+      // Token ID filter
+      if (filters.tokenId && !nft.id.includes(filters.tokenId) && 
+          !nft.name.toLowerCase().includes(`#${filters.tokenId}`)) {
         return false;
       }
-
-      // Date range filter
-      if (filters.dateRange) {
-        const mintDate = new Date(nft.mintDate || '');
-        if (filters.dateRange.from && mintDate < filters.dateRange.from) return false;
-        if (filters.dateRange.to && mintDate > filters.dateRange.to) return false;
+      
+      // General search terms
+      if (terms.length > 0) {
+        const searchableText = [
+          nft.name,
+          nft.collection || '',
+          nft.description,
+          nft.chain || '',
+          ...nft.attributes.map(attr => `${attr.trait_type} ${attr.value}`)
+        ].join(' ').toLowerCase();
+        
+        const matchesAllTerms = terms.every(term => searchableText.includes(term));
+        if (!matchesAllTerms) return false;
       }
-
+      
       return true;
     });
-  }, []);
+  }, [parseSearchQuery]);
 
   const loadNFTs = useCallback(async (reset: boolean = false) => {
     setLoading(true);
@@ -168,7 +215,7 @@ export const useNFTData = (searchQuery: string, filters: any) => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const filtered = filterNFTs(mockNFTs, searchQuery, filters);
+    const filtered = filterNFTs(mockNFTs, searchQuery);
     const startIndex = reset ? 0 : (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const newNFTs = filtered.slice(startIndex, endIndex);
@@ -183,7 +230,7 @@ export const useNFTData = (searchQuery: string, filters: any) => {
     
     setHasMore(endIndex < filtered.length);
     setLoading(false);
-  }, [searchQuery, filters, page, filterNFTs]);
+  }, [searchQuery, page, filterNFTs]);
 
   const loadMore = useCallback(() => {
     if (!loading && hasMore) {
@@ -194,13 +241,13 @@ export const useNFTData = (searchQuery: string, filters: any) => {
   useEffect(() => {
     setPage(1);
     loadNFTs(true);
-  }, [searchQuery, filters]);
+  }, [searchQuery]);
 
   return {
     nfts,
     loading,
     hasMore,
     loadMore,
-    totalCount: filterNFTs(mockNFTs, searchQuery, filters).length
+    totalCount: filterNFTs(mockNFTs, searchQuery).length
   };
 };
